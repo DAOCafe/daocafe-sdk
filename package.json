@@ -1,0 +1,73 @@
+{
+  "name": "daocafe-sdk",
+  "version": "0.1.0",
+  "description": "TypeScript SDK for DAO.CAFE - The GraphQL indexer for CreateDAO governance protocol",
+  "author": "DAO Cafe",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src/",
+    "prepublishOnly": "pnpm build"
+  },
+  "dependencies": {
+    "graphql": "^16.9.0",
+    "graphql-request": "^7.1.2"
+  },
+  "peerDependencies": {
+    "@tanstack/react-query": ">=5.0.0",
+    "react": ">=18.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@tanstack/react-query": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@tanstack/react-query": "^5.62.8",
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.0.2",
+    "react": "^19.0.0",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.2"
+  },
+  "keywords": [
+    "dao",
+    "governance",
+    "graphql",
+    "ethereum",
+    "base",
+    "createdao",
+    "web3",
+    "react",
+    "hooks"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/daocafe/daocafe-sdk"
+  },
+  "homepage": "https://dao.cafe"
+}
