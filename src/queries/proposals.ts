@@ -26,9 +26,9 @@ const PROPOSAL_FIELDS = gql`
     voteStart
     voteEnd
     eta
-    votesFor
-    votesAgainst
-    votesAbstain
+    forVotes
+    againstVotes
+    abstainVotes
     state
     createdAt
     blockNumber

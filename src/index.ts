@@ -24,6 +24,7 @@ export type {
   DAO,
   Proposal,
   Vote,
+  ProposalVote,
   Delegate,
   TokenHolder,
   GovernanceSettingsChange,

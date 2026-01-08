@@ -5,6 +5,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-01-08
+
+### Breaking Changes
+
+- **Renamed Proposal vote fields** to match OpenZeppelin Governor convention:
+  - `votesFor` → `forVotes`
+  - `votesAgainst` → `againstVotes`
+  - `votesAbstain` → `abstainVotes`
+
+### Added
+
+- **New Type Export**: `ProposalVote` - Type alias for `Vote` entity (for convenience)
+- **VoteQueryParams**: Added `"timestamp"` as valid `orderBy` option (alias for `"createdAt"`)
+
+### Migration Guide
+
+If you're upgrading from 0.1.x, update your code to use the new field names:
+
+```typescript
+// Before (0.1.x)
+proposal.votesFor
+proposal.votesAgainst
+proposal.votesAbstain
+
+// After (0.2.0)
+proposal.forVotes
+proposal.againstVotes
+proposal.abstainVotes
+```
+
 ## [0.1.0] - 2024-12-29
 
 ### Added

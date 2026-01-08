@@ -91,9 +91,9 @@ export interface Proposal {
   voteEnd: string;
   eta: string | null;
   /** Vote tallies */
-  votesFor: string;
-  votesAgainst: string;
-  votesAbstain: string;
+  forVotes: string;
+  againstVotes: string;
+  abstainVotes: string;
   state: ProposalState;
   createdAt: string;
   blockNumber: string;
@@ -125,6 +125,12 @@ export interface Vote {
   proposal?: Proposal;
   dao?: DAO;
 }
+
+/**
+ * ProposalVote type alias for Vote entity
+ * @deprecated Use Vote type instead
+ */
+export type ProposalVote = Vote;
 
 /**
  * Delegate entity - tracks delegation relationships
@@ -234,7 +240,7 @@ export interface VoteQueryParams extends PaginationParams {
   daoId?: string;
   voter?: string;
   support?: VoteSupport;
-  orderBy?: "createdAt" | "weight";
+  orderBy?: "createdAt" | "weight" | "timestamp";
   orderDirection?: OrderDirection;
 }
 

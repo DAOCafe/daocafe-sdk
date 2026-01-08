@@ -191,9 +191,9 @@ function ActiveProposals() {
         <div key={proposal.id}>
           <p>{proposal.description}</p>
           <p>
-            For: {proposal.votesFor} | 
-            Against: {proposal.votesAgainst} | 
-            Abstain: {proposal.votesAbstain}
+            For: {proposal.forVotes} | 
+            Against: {proposal.againstVotes} | 
+            Abstain: {proposal.abstainVotes}
           </p>
         </div>
       ))}
