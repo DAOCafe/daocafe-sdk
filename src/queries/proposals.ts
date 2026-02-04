@@ -22,6 +22,7 @@ const PROPOSAL_FIELDS = gql`
     values
     calldatas
     signatures
+    decodedActions
     description
     voteStart
     voteEnd

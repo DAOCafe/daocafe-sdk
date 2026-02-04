@@ -35,6 +35,13 @@ proposal.againstVotes
 proposal.abstainVotes
 ```
 
+## [0.2.1] - 2026-02-04
+
+### Added
+
+- Proposal field support: `decodedActions` (human-readable decoding of proposal calldata)
+- New exported types: `DecodedAction`, `DecodedData`, `DecodedSuccess`, `DecodedError`, `DecodedArg`
+
 ## [0.1.0] - 2024-12-29
 
 ### Added

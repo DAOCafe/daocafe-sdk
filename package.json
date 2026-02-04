@@ -1,6 +1,6 @@
 {
   "name": "daocafe-sdk",
-  "version": "0.3.0",
+  "version": "0.2.1",
   "description": "TypeScript SDK for DAO.CAFE - The GraphQL indexer for CreateDAO governance protocol",
   "author": "dikobay",
   "license": "MIT",
@@ -28,7 +28,7 @@
     "dev": "tsup --watch",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src/",
-    "prepublishOnly": "pnpm build"
+    "prepublishOnly": "npm run build"
   },
   "dependencies": {
     "graphql": "^16.9.0",

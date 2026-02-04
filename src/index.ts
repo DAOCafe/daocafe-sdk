@@ -40,6 +40,12 @@ export type {
   VoteQueryParams,
   DelegateQueryParams,
   TokenHolderQueryParams,
+  // Decoded actions
+  DecodedAction,
+  DecodedData,
+  DecodedSuccess,
+  DecodedError,
+  DecodedArg,
 } from "./types";
 
 // Query functions

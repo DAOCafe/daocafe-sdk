@@ -85,6 +85,11 @@ export interface Proposal {
   values: string[];
   calldatas: string[];
   signatures: string[] | null;
+  /**
+   * Human-readable decoding of each (target,value,calldata) action.
+   * This is produced by the indexer at indexing time.
+   */
+  decodedActions?: DecodedAction[] | null;
   description: string;
   /** Timing */
   voteStart: string;
@@ -101,6 +106,45 @@ export interface Proposal {
   /** Relations */
   dao?: DAO;
   votes?: Vote[];
+}
+
+// ============================================================================
+// DECODED ACTION TYPES
+// ============================================================================
+
+/** A single decoded argument from calldata */
+export interface DecodedArg {
+  /** Generic name (arg0, arg1, etc.) since 4bytes doesn't provide parameter names */
+  name: string;
+  /** Solidity type (uint256, address, bytes, etc.) */
+  type: string;
+  /** Stringified value */
+  value: string;
+}
+
+export interface DecodedSuccess {
+  status: "success";
+  functionName: string;
+  signature: string;
+  args: DecodedArg[];
+  summary: string;
+}
+
+export interface DecodedError {
+  status: "error";
+  error: string;
+  selector: string;
+  hint: string;
+}
+
+export type DecodedData = DecodedSuccess | DecodedError;
+
+export interface DecodedAction {
+  index: number;
+  target: string;
+  value: string;
+  calldata: string;
+  decoded: DecodedData;
 }
 
 /**
