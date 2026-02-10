@@ -58,6 +58,8 @@ export interface DAO {
   votingPeriod: string | null;
   proposalThreshold: string | null;
   quorumNumerator: string | null;
+  /** Timelock configuration */
+  timelockMinDelay: string | null;
   createdAt: string;
   blockNumber: string;
   transactionHash: string;

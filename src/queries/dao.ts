@@ -29,6 +29,7 @@ const DAO_FIELDS = gql`
     votingPeriod
     proposalThreshold
     quorumNumerator
+    timelockMinDelay
     createdAt
     blockNumber
     transactionHash

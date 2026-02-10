@@ -276,7 +276,7 @@ function InvalidateExample() {
 
 ## Supported Networks
 
-- Base Mainnet (Chain ID: 8453)
+- Ethereum Mainnet (Chain ID: 1)
 - Sepolia Testnet (Chain ID: 11155111)
 
 ## License
