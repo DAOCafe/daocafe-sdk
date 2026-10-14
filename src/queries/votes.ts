@@ -1,236 +1,82 @@
-import { gql, type GraphQLClient } from "graphql-request";
-import { daoCafeClient } from "../client";
+import { daoCafeClient, type DaoCafeClient } from "../client";
 import type { Vote, VoteQueryParams, PaginatedResponse } from "../types";
-
-// ============================================================================
-// GRAPHQL QUERIES
-// ============================================================================
-
-const VOTE_FIELDS = gql`
-  fragment VoteFields on vote {
-    id
-    proposalId
-    daoId
-    chainId
-    governor
-    voter
-    support
-    weight
-    reason
-    params
-    createdAt
-    blockNumber
-    transactionHash
-  }
-`;
-
-const GET_VOTES = gql`
-  ${VOTE_FIELDS}
-  query GetVotes(
-    $limit: Int
-    $after: String
-    $before: String
-    $orderBy: String
-    $orderDirection: String
-    $proposalId: String
-    $daoId: String
-    $voter: String
-    $support: voteSupport
-  ) {
-    votes(
-      limit: $limit
-      after: $after
-      before: $before
-      orderBy: $orderBy
-      orderDirection: $orderDirection
-      where: { proposalId: $proposalId, daoId: $daoId, voter: $voter, support: $support }
-    ) {
-      items {
-        ...VoteFields
-      }
-      pageInfo {
-        hasNextPage
-        hasPreviousPage
-        startCursor
-        endCursor
-      }
-    }
-  }
-`;
-
-const GET_VOTES_BY_PROPOSAL = gql`
-  ${VOTE_FIELDS}
-  query GetVotesByProposal(
-    $proposalId: String!
-    $limit: Int
-    $after: String
-    $before: String
-    $orderBy: String
-    $orderDirection: String
-  ) {
-    votes(
-      where: { proposalId: $proposalId }
-      limit: $limit
-      after: $after
-      before: $before
-      orderBy: $orderBy
-      orderDirection: $orderDirection
-    ) {
-      items {
-        ...VoteFields
-      }
-      pageInfo {
-        hasNextPage
-        hasPreviousPage
-        startCursor
-        endCursor
-      }
-    }
-  }
-`;
-
-const GET_VOTES_BY_VOTER = gql`
-  ${VOTE_FIELDS}
-  query GetVotesByVoter(
-    $voter: String!
-    $limit: Int
-    $after: String
-    $before: String
-    $orderBy: String
-    $orderDirection: String
-  ) {
-    votes(
-      where: { voter: $voter }
-      limit: $limit
-      after: $after
-      before: $before
-      orderBy: $orderBy
-      orderDirection: $orderDirection
-    ) {
-      items {
-        ...VoteFields
-      }
-      pageInfo {
-        hasNextPage
-        hasPreviousPage
-        startCursor
-        endCursor
-      }
-    }
-  }
-`;
-
-const GET_VOTE = gql`
-  ${VOTE_FIELDS}
-  query GetVote($id: String!) {
-    vote(id: $id) {
-      ...VoteFields
-    }
-  }
-`;
-
-// ============================================================================
-// QUERY FUNCTIONS
-// ============================================================================
-
-interface GetVotesResponse {
-  votes: PaginatedResponse<Vote>;
-}
-
-interface GetVoteResponse {
-  vote: Vote | null;
-}
 
 /**
  * Fetch votes with optional filters
  *
- * @param params - Query parameters (proposalId, voter, support, pagination, etc.)
- * @param client - Optional custom GraphQL client
+ * @param params - Query parameters (proposalId, daoId, voter, support, pagination)
+ * @param client - Optional custom client
  * @returns Paginated list of votes
  *
  * @example
  * ```ts
- * // Get all votes
- * const { items } = await getVotes({ limit: 50 });
- *
- * // Get "FOR" votes on a proposal
- * const { items } = await getVotes({ proposalId: "8453_0x..._123", support: "FOR" });
+ * const { items } = await getVotes({ daoId: "1_0x...", support: "FOR" });
  * ```
  */
 export async function getVotes(
   params: VoteQueryParams = {},
-  client: GraphQLClient = daoCafeClient
+  client: DaoCafeClient = daoCafeClient
 ): Promise<PaginatedResponse<Vote>> {
-  const { votes } = await client.request<GetVotesResponse>(GET_VOTES, params);
-  return votes;
+  return client.request("votes", params);
 }
 
 /**
- * Fetch all votes for a specific proposal
+ * Fetch votes for a specific proposal
  *
  * @param proposalId - Proposal ID (format: chainId_governor_proposalId)
  * @param params - Additional query parameters
- * @param client - Optional custom GraphQL client
- * @returns Paginated list of votes for the proposal
+ * @param client - Optional custom client
+ * @returns Paginated list of votes on the proposal
  *
  * @example
  * ```ts
- * const { items } = await getVotesByProposal("8453_0x1234..._123", { limit: 100 });
+ * const { items } = await getVotesByProposal("1_0x..._123", { orderBy: "weight" });
  * ```
  */
 export async function getVotesByProposal(
   proposalId: string,
   params: Omit<VoteQueryParams, "proposalId"> = {},
-  client: GraphQLClient = daoCafeClient
+  client: DaoCafeClient = daoCafeClient
 ): Promise<PaginatedResponse<Vote>> {
-  const { votes } = await client.request<GetVotesResponse>(GET_VOTES_BY_PROPOSAL, {
-    proposalId,
-    ...params,
-  });
-  return votes;
+  return client.request("votes", { ...params, proposalId });
 }
 
 /**
- * Fetch all votes cast by a specific voter
+ * Fetch all votes cast by an address
  *
  * @param voter - Voter address
  * @param params - Additional query parameters
- * @param client - Optional custom GraphQL client
+ * @param client - Optional custom client
  * @returns Paginated list of votes by the voter
  *
  * @example
  * ```ts
- * const { items } = await getVotesByVoter("0x1234...", { limit: 50 });
+ * const { items } = await getVotesByVoter("0x1234...");
  * ```
  */
 export async function getVotesByVoter(
   voter: string,
   params: Omit<VoteQueryParams, "voter"> = {},
-  client: GraphQLClient = daoCafeClient
+  client: DaoCafeClient = daoCafeClient
 ): Promise<PaginatedResponse<Vote>> {
-  const { votes } = await client.request<GetVotesResponse>(GET_VOTES_BY_VOTER, {
-    voter,
-    ...params,
-  });
-  return votes;
+  return client.request("votes", { ...params, voter });
 }
 
 /**
  * Fetch a single vote by its ID
  *
  * @param id - Vote ID (format: chainId_governor_proposalId_voter)
- * @param client - Optional custom GraphQL client
+ * @param client - Optional custom client
  * @returns Vote or null if not found
  *
  * @example
  * ```ts
- * const vote = await getVote("8453_0x1234..._123_0xabcd...");
+ * const vote = await getVote("1_0x..._123_0xvoter...");
  * ```
  */
 export async function getVote(
   id: string,
-  client: GraphQLClient = daoCafeClient
+  client: DaoCafeClient = daoCafeClient
 ): Promise<Vote | null> {
-  const { vote } = await client.request<GetVoteResponse>(GET_VOTE, { id });
-  return vote;
+  return client.request("vote", { id });
 }

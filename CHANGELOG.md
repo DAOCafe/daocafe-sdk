@@ -6,6 +6,36 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.3.0] - 2026-10-14
+
+### Breaking Changes
+
+- **No more GraphQL indexer.** Data is read directly from the chain via RPC by a server
+  handler you mount in your app (`daocafe-sdk/server`). The hooks and query functions
+  keep the same names, parameters and return types, but now call `/api/daocafe` on your origin
+  by default instead of `https://dao.cafe/graphql`.
+- `createClient(endpoint, options)` now returns a `DaoCafeClient` (fetch-based);
+  `GraphQLClient` is no longer exported. The `graphql` / `graphql-request` dependencies are removed.
+
+### Added
+
+- `daocafe-sdk/server`: `createDaoCafeHandler` (Fetch API / Next.js App Router),
+  `createDaoCafeNodeHandler` (Node / Pages Router), `createDaoCafeServer` (direct queries)
+- Incremental `eth_getLogs` sync with in-memory cache, optional on-disk persistence
+  (`cacheDir`), RPC fallback and automatic block-range splitting
+- Live proposal state (events + `state()` for ended proposals) instead of indexer-stored state
+- Calldata decoding with local ABIs for common governance calls (real argument names),
+  falling back to 4byte.directory
+- `refreshDaoCafe(queryClient)` and `markFresh()` to bypass the cache after a transaction
+- `setDefaultEndpoint(url)`
+- `npm run verify`: cross-checks derived data against direct contract reads
+
+### Changed
+
+- Delegations and token holders now include events from the DAO creation transaction
+  (the indexer skipped token events that ran before `DAOCreated`)
+
+
 ## [0.2.2] - 2026-02-10
 
 ### Added
@@ -93,4 +123,5 @@ proposal.abstainVotes
 ### Supported Networks
 
 - Ethereum Mainnet (Chain ID: 1)
+- Arbitrum (Chain ID: 42161)
 - Sepolia Testnet (Chain ID: 11155111)

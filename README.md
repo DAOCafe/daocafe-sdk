@@ -1,14 +1,14 @@
 # daocafe-sdk
 
-TypeScript SDK for [DAO.CAFE](https://dao.cafe) - The GraphQL indexer for the CreateDAO governance protocol.
+TypeScript SDK for [DAO.CAFE](https://dao.cafe) - governance data for the CreateDAO protocol, read directly from the chain via RPC. No indexer required.
 
 ## Features
 
-- 🔍 **Type-safe queries** - Full TypeScript support with generated types
+- 🔍 **Type-safe queries** - Full TypeScript support
 - ⚛️ **React hooks** - TanStack Query integration for seamless data fetching
-- 🚀 **Tree-shakable** - Only bundle what you use
-- 📦 **Zero config** - Pre-configured to work with the DAO.CAFE endpoint
-- 🔄 **Real-time ready** - Built-in caching and refetching with TanStack Query
+- ⛓️ **No indexer** - A server handler you mount in your own app reads the CreateDAO contracts over RPC
+- 💸 **Cheap** - Cached in memory (optionally on disk); at most one small incremental sync per chain every 15s, only while someone is browsing
+- 🔄 **Fresh after transactions** - `refreshDaoCafe()` bypasses the cache once a vote or proposal is mined
 
 ## Installation
 
@@ -27,6 +27,66 @@ For React hooks, you'll need:
 ```bash
 npm install @tanstack/react-query react
 ```
+
+The server handler needs `viem`:
+
+```bash
+npm install viem
+```
+
+## Setup: mount the server handler
+
+The hooks and query functions call `/api/daocafe` on your own origin. Mount the
+handler there; it reads the chain and caches the results.
+
+```ts
+// Next.js App Router: app/api/daocafe/route.ts
+import { createDaoCafeHandler } from 'daocafe-sdk/server';
+
+export const GET = createDaoCafeHandler({
+  rpcUrls: {
+    1: process.env.RPC_URL_ETHEREUM,
+    42161: process.env.RPC_URL_ARBITRUM,
+    11155111: process.env.RPC_URL_SEPOLIA,
+  },
+  cacheDir: process.env.DAOCAFE_CACHE_DIR, // optional: survive restarts
+});
+```
+
+```ts
+// Next.js Pages Router: pages/api/daocafe.ts (also works with Express / node:http)
+import { createDaoCafeNodeHandler } from 'daocafe-sdk/server';
+
+export default createDaoCafeNodeHandler({ rpcUrls: { 1: process.env.RPC_URL_ETHEREUM } });
+```
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `rpcUrls` | — | RPC URL (or list) per chain id. Empty entries are skipped. Public RPCs are appended as fallbacks. |
+| `chains` | all known | Chain ids to serve (`1`, `42161`, `11155111`) |
+| `minSyncIntervalMs` | `15000` | Minimum time between two syncs of a chain |
+| `minFreshIntervalMs` | `5000` | Same, for requests sent after `refreshDaoCafe()` |
+| `cacheDir` | memory only | Directory to persist synced events in, so restarts don't re-scan history |
+| `fourByte` | `true` | Decode unknown proposal calldata via 4byte.directory |
+| `publicFallback` | `true` | Append public RPCs after `rpcUrls` |
+| `deployments` | built in | Add or override factory address / start block per chain |
+
+Use `createDaoCafeServer(config).query(op, params)` to read data in server
+components or scripts without HTTP.
+
+### How it works
+
+- **DAOs, proposals, votes, delegations, holders** are rebuilt from `eth_getLogs`
+  on the factory and every governor and token it created. The first sync scans from the
+  factory deployment block (about one request per chain with a provider such as dRPC);
+  later syncs only fetch new blocks.
+- **The last ~minute of blocks is re-read on every sync**, because providers can return an
+  empty `eth_getLogs` for a block whose logs are not indexed yet.
+- **Proposal state** comes from events plus the block time. When a vote has ended, `state()`
+  is read once to decide succeeded vs defeated, and the answer is cached.
+- **Settings** (voting delay/period, threshold, quorum, manager, timelock delay) are
+  read via multicall when a DAO appears and again after relevant governor events.
+- If a provider rejects a block range, the range is split automatically.
 
 ## Quick Start
 
@@ -225,19 +285,29 @@ function VotingPower({ address }: { address: string }) {
 }
 ```
 
-### Custom GraphQL Client
+### Refresh After a Transaction
+
+```tsx
+import { useQueryClient } from '@tanstack/react-query';
+import { refreshDaoCafe } from 'daocafe-sdk';
+
+const queryClient = useQueryClient();
+// after waitForTransactionReceipt(...) resolves:
+await refreshDaoCafe(queryClient); // refetch all SDK queries, bypassing the server cache
+```
+
+Call `markFresh()` instead if you invalidate queries yourself.
+
+### Custom Endpoint
 
 ```ts
-import { createClient, getDAOs } from 'daocafe-sdk';
+import { createClient, getDAOs, setDefaultEndpoint } from 'daocafe-sdk';
 
-// Create a custom client
-const client = createClient('https://your-endpoint.com/graphql', {
-  headers: {
-    Authorization: 'Bearer your-token',
-  },
-});
+// Point all hooks at another handler URL
+setDefaultEndpoint('https://createdao.org/api/daocafe');
 
-// Use with query functions
+// Or use a dedicated client with query functions (e.g. for server-side fetches)
+const client = createClient('https://createdao.org/api/daocafe');
 const daos = await getDAOs({ limit: 10 }, client);
 ```
 
@@ -277,6 +347,7 @@ function InvalidateExample() {
 ## Supported Networks
 
 - Ethereum Mainnet (Chain ID: 1)
+- Arbitrum (Chain ID: 42161)
 - Sepolia Testnet (Chain ID: 11155111)
 
 ## License

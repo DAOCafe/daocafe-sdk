@@ -1,8 +1,11 @@
 // ============================================================================
 // DAOCAFE SDK
 // ============================================================================
-// TypeScript SDK for DAO.CAFE - The GraphQL indexer for CreateDAO protocol
+// TypeScript SDK for DAO.CAFE - CreateDAO governance data read via RPC
 // https://dao.cafe
+//
+// Client side: query functions + React hooks that call your app's handler.
+// Server side: `daocafe-sdk/server` (createDaoCafeHandler) reads the chain.
 // ============================================================================
 
 // Client
@@ -10,9 +13,15 @@ export {
   daoCafeClient,
   createClient,
   setClientHeaders,
+  setDefaultEndpoint,
+  markFresh,
   DEFAULT_ENDPOINT,
-  GraphQLClient,
+  DaoCafeClient,
 } from "./client";
+export type { DaoCafeClientOptions, DaoCafeOperation } from "./client";
+
+// Cache refresh after transactions
+export { refreshDaoCafe } from "./refresh";
 
 // Types
 export type {
